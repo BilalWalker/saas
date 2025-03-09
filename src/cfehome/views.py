@@ -8,6 +8,8 @@ from visits.models import PageVisit
 this_dir = Path(__file__).resolve().parent
 
 def home_view(request, *args, **kwargs):
+    if request.user.is_authenticated:
+        print(request.user.is_authenticated, request.user)
     return about_view(request, *args, **kwargs)
 
 def about_view(request, *args, **kwargs):
