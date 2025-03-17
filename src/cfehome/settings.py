@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     'visits',
     "commando",
     "profiles",
+    "subscriptions",
     # third-party-apps
     'allauth_ui',    
     'allauth',
@@ -158,7 +159,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Django Allauth Config
 LOGIN_REDIRECT_URL = "/"
 ACCOUNT_LOGIN_METHODS = {'email', 'username'}
-ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+# ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 ACCOUNT_EMAIL_SUBJECT_PREFIX="[CFE] "
 ACCOUNT_EMAIL_REQUIRED=True
 
