@@ -161,6 +161,23 @@ class UserSubscription(models.Model):
     stripe_id = models.CharField(max_length=120, null=True, blank=True)
     active = models.BooleanField(default=True)
     user_cancelled = models.BooleanField(default=False)
+    original_period_start = models.DateTimeField(auto_now=False, auto_now_add=False, null=True, blank=True)
+    current_period_start = models.DateTimeField(auto_now=False, auto_now_add=False, null=True, blank=True)
+    current_period_end = models.DateTimeField(auto_now=False, auto_now_add=False, null=True, blank=True)
+
+    @property
+    def billing_cycle_anchor(self):
+        """
+        Optional delay to start new subscription in Stripe checkout
+        """
+        if not self.current_period_end:
+            return None
+        return int(self.current_period_end.timestamp())
+
+    def save(self, *args, **kwargs):
+        if (self.original_period_start is None and self.current_period_start is not None):
+            self.original_period_start = self.current_period_start
+        super().save(*args, **kwargs)
 
 
 # set user groups based on UserSubscription
