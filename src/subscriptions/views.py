@@ -1,12 +1,16 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 
 from subscriptions.models import SubscriptionPrice, UserSubscription
 import helpers.billing
 
 @login_required
 def user_subscription_view(request):
+    print(type(request),'-----' ,request.path, '-----')
+    print('type(request.user)', type(request.user))
+    print('request.user', request.user.customer)
     user_sub_obj, created = UserSubscription.objects.get_or_create(user=request.user)
     # sub_data = user_sub_obj.serialize()
     if request.method == "POST":
@@ -16,8 +20,26 @@ def user_subscription_view(request):
             for k, v in sub_data.items():
                 setattr(user_sub_obj, k, v)
             user_sub_obj.save()
+        messages.success(request, "Your plan details have been refreshed.")
         return redirect(user_sub_obj.get_absolute_url())
     return render(request, 'subscriptions/user_detail_view.html', {"subscription": user_sub_obj})
+
+@login_required
+def user_subscription_cancel_view(request):
+    user_sub_obj, created = UserSubscription.objects.get_or_create(user=request.user)
+    if request.method == "POST":
+        if user_sub_obj.stripe_id and user_sub_obj.is_active_status:
+            sub_data = helpers.billing.cancel_subscription(
+                user_sub_obj.stripe_id,
+                reason="User wanted to end",
+                feedback="other",
+                raw=False)
+            for k, v in sub_data.items():
+                setattr(user_sub_obj, k, v)
+            user_sub_obj.save()
+            messages.success(request, "Your subscription has been cancelled.")
+        return redirect(user_sub_obj.get_absolute_url())
+    return render(request, 'subscriptions/user_cancel_view.html', {"subscription": user_sub_obj})
 
 
 # Create your views here.

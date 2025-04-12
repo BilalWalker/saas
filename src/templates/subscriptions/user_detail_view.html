@@ -10,6 +10,8 @@
     <button type="submit">Refresh</button>
 </form>
 
+<a href="{{ subscription.get_cancel_url }}">Cancel Membership</a>
+
 <P>Plan name: {{ subscription.plan_name }}</P>
 
 <p>Status: {{ subscription.status|title }}</p>
