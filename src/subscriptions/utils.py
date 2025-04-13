@@ -6,18 +6,32 @@ from customers.models import Customer
 from subscriptions.models import UserSubscription, Subscription, SubscriptionStatus
 import helpers.billing
 
-def refresh_active_users_subscription(user_ids=None, active_only=True, verbose=False):
+def refresh_active_users_subscription(
+        user_ids=None,
+        active_only=True,
+        days_left=0,
+        days_ago=0,
+        day_start=0,
+        day_end=0,
+        verbose=False
+    ):
     qs = UserSubscription.objects.all()
     if active_only:
         qs = qs.by_active_trialing()
     if user_ids is not None:
         qs = qs.by_user_ids(user_ids=user_ids)
-    complete_count = 0
-    qs_count = qs.count()
+    if days_ago > 0:
+        qs = qs.by_days_ago(days_ago=days_ago)
+    if days_left > 0:
+        qs = qs.by_days_left(days_left=days_left)
+    if day_start > 0 and day_end > 0:
+        qs = qs.by_range(day_start=day_start, day_end=day_end)    
     # qs = qs.filter(active_qs_lookup).filter(user_id__in=user_ids)
     # active_qs = qs.filter(status=SubscriptionStatus.ACTIVE)
     # trialing_qs = qs.filter(status=SubscriptionStatus.TRIALING)
     # qs = (active_qs | trialing_qs)
+    complete_count = 0
+    qs_count = qs.count()
     for obj in qs:
         if verbose:
             print("Updating user", obj.user, obj.subscription, obj.current_period_end)
