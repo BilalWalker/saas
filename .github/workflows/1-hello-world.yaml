@@ -2,9 +2,11 @@ name: 1 - Hello World GitHub actions
 
 on:
   workflow_dispatch: # Manually trigger the action
-  push: # git push
-    branch:
-      - main # branch to trigger the action
+  # schedule:
+  #   - cron: '30 15 * * *'
+  # push: # git push
+  #   branch:
+  #     - main # branch to trigger the action
 
 jobs:
   hello:
