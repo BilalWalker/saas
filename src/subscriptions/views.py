@@ -16,7 +16,7 @@ def user_subscription_view(request):
     # sub_data = user_sub_obj.serialize()
     if request.method == "POST":
         print("refresh sub")
-        finished = subs_utils.refresh_active_users_subscription(user_ids=[request.user.id])
+        finished = subs_utils.refresh_active_users_subscription(user_ids=[request.user.id], active_only=False)
         if finished:
             messages.success(request, "Your plan details have been refreshed.")
         else:

@@ -6,18 +6,12 @@ from customers.models import Customer
 from subscriptions.models import UserSubscription, Subscription, SubscriptionStatus
 import helpers.billing
 
-def refresh_active_users_subscription(user_ids=None):
-    active_qs_lookup = (
-        Q(status=SubscriptionStatus.ACTIVE) | 
-        Q(status=SubscriptionStatus.TRIALING)
-    )
-    qs = UserSubscription.objects.filter(active_qs_lookup)
-    if isinstance(user_ids, list):
-        qs = qs.filter(user_id__in=user_ids)
-    elif isinstance(user_ids, int):
-        qs = qs.filter(user_id__in=[user_ids])
-    elif isinstance(user_ids, str):
-        qs = qs.filter(user_id__in=[user_ids])
+def refresh_active_users_subscription(user_ids=None, active_only=True, verbose=False):
+    qs = UserSubscription.objects.all()
+    if active_only:
+        qs = qs.by_active_trialing()
+    if user_ids is not None:
+        qs = qs.by_user_ids(user_ids=user_ids)
     complete_count = 0
     qs_count = qs.count()
     # qs = qs.filter(active_qs_lookup).filter(user_id__in=user_ids)
@@ -25,6 +19,8 @@ def refresh_active_users_subscription(user_ids=None):
     # trialing_qs = qs.filter(status=SubscriptionStatus.TRIALING)
     # qs = (active_qs | trialing_qs)
     for obj in qs:
+        if verbose:
+            print("Updating user", obj.user, obj.subscription, obj.current_period_end)
         if obj.stripe_id:
             sub_data = helpers.billing.get_subscription(obj.stripe_id, raw=False)
             for k, v in sub_data.items():
