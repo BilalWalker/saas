@@ -2,9 +2,9 @@ name: 2 - Test Django Basic
 
 on:
   workflow_dispatch: 
-  # push:
-  #   branch:
-  #     - main
+  push:
+    branch:
+      - main
 jobs:
   test: # name of the job
     runs-on: ubuntu-latest # OS to run the action on
@@ -21,5 +21,7 @@ jobs:
           pip install -r requirements.txt # Install requirements from requirements.txt
       - name: Django Tests
         working-directory: ./src
+        env:
+          DJANGO_SECRET_KEY: not-good
         run: |
           python manage.py test
